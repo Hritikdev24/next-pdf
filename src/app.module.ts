@@ -11,15 +11,19 @@ import { join } from 'path';
 import { AuthModule } from './auth/auth.module';
 import { UserpdfModule } from './userpdf/userpdf.module';
 import { MicroserviceModule } from './microservice/microservice.module';
-
+import { ConfigService } from '@nestjs/config';
 
 @Module({
   imports: [
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, '..', 'public'),
     }),
-    MongooseModule.forRoot('mongodb://localhost:27017/hritikDb'),
-    ConfigModule.forRoot({
+    MongooseModule.forRootAsync({
+      inject: [ConfigService],
+      useFactory: async (configService: ConfigService) => ({
+        uri: configService.get<string>('MONGO_DB'), // from .env
+      }),
+    }),    ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: '.env',
     }),
